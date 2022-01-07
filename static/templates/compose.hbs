@@ -103,9 +103,14 @@
                                     {{> compose_control_buttons }}
                                 </div>
                                 <div class="compose_bottom_bottom_container">
-                                    <a role="button" class="message-control-link" tabindex=0 data-overlay-trigger="message-formatting">
-                                        <i class="fa fa-question-circle"></i>{{t 'Help' }}
-                                    </a>
+                                    <div class="compose-bottom-left-message-control-links">
+                                        <a role="button" class="message-control-link" tabindex=0 data-overlay-trigger="message-formatting">
+                                            <i class="fa fa-question-circle"></i>{{t 'Help' }}
+                                        </a>
+                                        <a role="button" class="message-control-link" tabindex=0 href="#drafts">
+                                            <i class="fa fa-pencil"></i>{{t 'Drafts' }}
+                                        </a>
+                                    </div>
                                     <span id="compose_limit_indicator"></span>
                                     <div class="enter_sends">
                                         <span class="enter_sends_true">
