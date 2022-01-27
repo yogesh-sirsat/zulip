@@ -27,7 +27,7 @@ which had 2 valid values:
 - "idle" -- the user has not interacted with the client recently.
   This is important for the case where a user left a Zulip tab open on
   their desktop at work and went home for the weekend. We use this
-  for the "orange" state in the web app.
+  for the "half-green" state in the web app.
 
 The client receives in the response to that request a data set that,
 for each user, contains their status and timestamp that we last heard
