@@ -736,3 +736,9 @@ a.compose_control_button.hide {
         flex: 1;
     }
 }
+
+.preview_mode {
+    .preview_mode_hidden {
+        visibility: hidden;
+    }
+}

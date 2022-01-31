@@ -293,6 +293,7 @@ test_ui("enter_with_preview_open", ({override, override_rewire}) => {
     $("#compose .undo_markdown_preview").show();
     $("#compose .preview_message_area").show();
     $("#compose .markdown_preview").hide();
+    $("#compose").addClass("preview_mode");
     user_settings.enter_sends = true;
     let send_message_called = false;
     override_rewire(compose, "send_message", () => {
@@ -303,6 +304,7 @@ test_ui("enter_with_preview_open", ({override, override_rewire}) => {
     assert.ok(!$("#compose .undo_markdown_preview").visible());
     assert.ok(!$("#compose .preview_message_area").visible());
     assert.ok($("#compose .markdown_preview").visible());
+    assert.ok(!$("#compose").hasClass("preview_mode"));
     assert.ok(send_message_called);
     assert.ok(show_button_spinner_called);
 
@@ -353,6 +355,7 @@ test_ui("finish", ({override, override_rewire}) => {
         $("#compose .undo_markdown_preview").show();
         $("#compose .preview_message_area").show();
         $("#compose .markdown_preview").hide();
+        $("#compsoe").addClass("preview_mode");
         $("#compose-textarea").val("foobarfoobar");
         compose_state.set_message_type("private");
         override_rewire(compose_state, "private_message_recipient", () => "bob@example.com");
@@ -371,6 +374,7 @@ test_ui("finish", ({override, override_rewire}) => {
         assert.ok(!$("#compose .undo_markdown_preview").visible());
         assert.ok(!$("#compose .preview_message_area").visible());
         assert.ok($("#compose .markdown_preview").visible());
+        assert.ok(!$("#compose").hasClass("preview_mode"));
         assert.ok(send_message_called);
         assert.ok(compose_finished_event_checked);
 
@@ -378,6 +382,7 @@ test_ui("finish", ({override, override_rewire}) => {
         $("#compose .undo_markdown_preview").show();
         $("#compose .preview_message_area").show();
         $("#compose .markdown_preview").hide();
+        $("#compose").addClass("preview_mode");
         $("#compose-textarea").val("foobarfoobar");
         compose_state.set_message_type("stream");
         override_rewire(compose_state, "stream_name", () => "social");
@@ -393,6 +398,7 @@ test_ui("finish", ({override, override_rewire}) => {
         assert.ok(!$("#compose .undo_markdown_preview").visible());
         assert.ok(!$("#compose .preview_message_area").visible());
         assert.ok($("#compose .markdown_preview").visible());
+        assert.ok(!$("#compose").hasClass("preview_mode"));
         assert.ok(schedule_message);
         assert.ok(compose_finished_event_checked);
     })();
@@ -760,6 +766,7 @@ test_ui("on_events", ({override, override_rewire}) => {
             $("#compose .markdown_preview").show();
             $("#compose .undo_markdown_preview").hide();
             $("#compose .preview_message_area").hide();
+            $("#compose").removeClass("preview_mode");
         }
 
         function assert_visibilities() {
@@ -767,6 +774,7 @@ test_ui("on_events", ({override, override_rewire}) => {
             assert.ok(!$("#compose .markdown_preview").visible());
             assert.ok($("#compose .undo_markdown_preview").visible());
             assert.ok($("#compose .preview_message_area").visible());
+            assert.ok($("#compose").hasClass("preview_mode"));
         }
 
         function setup_mock_markdown_contains_backend_only_syntax(msg_content, return_val) {
@@ -887,6 +895,7 @@ test_ui("on_events", ({override, override_rewire}) => {
         $("#compose .undo_markdown_preview").show();
         $("#compose .preview_message_area").show();
         $("#compose .markdown_preview").hide();
+        $("#compose").removeClass("preview_mode");
 
         const event = {
             preventDefault: noop,
@@ -899,6 +908,7 @@ test_ui("on_events", ({override, override_rewire}) => {
         assert.ok(!$("#compose .undo_markdown_preview").visible());
         assert.ok(!$("#compose .preview_message_area").visible());
         assert.ok($("#compose .markdown_preview").visible());
+        assert.ok(!$("#compose").hasClass("preview_mode"));
     })();
 });
 
