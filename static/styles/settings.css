@@ -574,6 +574,11 @@ input[type="checkbox"] {
     margin-top: 4px;
 }
 
+#profile-field-settings #add-custom-profile-field-btn {
+    float: right;
+    margin-top: 4px;
+}
+
 #user-notification-settings {
     .notification-table {
         th,
@@ -682,7 +687,6 @@ input[type="checkbox"] {
     vertical-align: middle;
 }
 
-.add-new-profile-field-box,
 .add-new-linkifier-box,
 .add-new-playground-box {
     button {
@@ -1671,14 +1675,14 @@ input[type="checkbox"] {
     }
 
     .choice-row {
-        margin-top: 5px;
+        margin-top: 8px;
 
         input {
             width: 190px;
         }
 
         button {
-            margin-left: 0 !important;
+            margin-left: 2px;
         }
     }
 
