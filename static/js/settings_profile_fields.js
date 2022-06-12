@@ -3,6 +3,7 @@ import {Sortable} from "sortablejs";
 
 import render_add_new_custom_profile_field_form from "../templates/settings/add_new_custom_profile_field_form.hbs";
 import render_admin_profile_field_list from "../templates/settings/admin_profile_field_list.hbs";
+import render_edit_custom_profile_field_form from "../templates/settings/edit_custom_profile_field_form.hbs";
 import render_settings_profile_field_choice from "../templates/settings/profile_field_choice.hbs";
 
 import * as channel from "./channel";
@@ -223,13 +224,6 @@ function delete_choice_row(e) {
     update_choice_delete_btn($container, false);
 }
 
-function get_profile_field_info(id) {
-    const info = {};
-    info.$row = $(`tr.profile-field-row[data-profile-field-id='${CSS.escape(id)}']`);
-    info.$form = $(`tr.profile-field-form[data-profile-field-id='${CSS.escape(id)}']`);
-    return info;
-}
-
 function get_profile_field(id) {
     return page_params.custom_profile_fields.find((field) => field.id === id);
 }
@@ -247,22 +241,22 @@ export function parse_field_choices_from_field_data(field_data) {
     return choices;
 }
 
-function set_up_external_account_field_edit_form(field_elem, url_pattern_val) {
-    if (field_elem.$form.find("select[name=external_acc_field_type]").val() === "custom") {
-        field_elem.$form.find("input[name=url_pattern]").val(url_pattern_val);
-        field_elem.$form.find(".custom_external_account_detail").show();
-        field_elem.$form.find("input[name=name]").val("").closest(".control-group").show();
-        field_elem.$form.find("input[name=hint]").val("").closest(".control-group").show();
+function set_up_external_account_field_edit_form($field_elem, url_pattern_val) {
+    if ($field_elem.find("select[name=external_acc_field_type]").val() === "custom") {
+        $field_elem.find("input[name=url_pattern]").val(url_pattern_val);
+        $field_elem.find(".custom_external_account_detail").show();
+        $field_elem.find("input[name=name]").val("").closest(".control-group").show();
+        $field_elem.find("input[name=hint]").val("").closest(".control-group").show();
     } else {
-        field_elem.$form.find("input[name=name]").closest(".control-group").hide();
-        field_elem.$form.find("input[name=hint]").closest(".control-group").hide();
-        field_elem.$form.find(".custom_external_account_detail").hide();
+        $field_elem.find("input[name=name]").closest(".control-group").hide();
+        $field_elem.find("input[name=hint]").closest(".control-group").hide();
+        $field_elem.find(".custom_external_account_detail").hide();
     }
 }
 
-function set_up_select_field_edit_form(profile_field, field_data) {
+function set_up_select_field_edit_form($profile_field, field_data) {
     // Re-render field choices in edit form to load initial select data
-    const $choice_list = profile_field.$form.find(".edit_profile_field_choices_container");
+    const $choice_list = $profile_field.find(".edit_profile_field_choices_container");
     $choice_list.off();
     $choice_list.html("");
 
@@ -286,73 +280,89 @@ function set_up_select_field_edit_form(profile_field, field_data) {
     });
 }
 
-function open_edit_form(e) {
+function open_edit_form_modal(e) {
     const field_id = Number.parseInt($(e.currentTarget).attr("data-profile-field-id"), 10);
-    const profile_field = get_profile_field_info(field_id);
+    const profile_field = get_profile_field(field_id);
 
-    profile_field.$row.hide();
-    profile_field.$form.show();
-    const field = get_profile_field(field_id);
     let field_data = {};
-    if (field.field_data) {
-        field_data = JSON.parse(field.field_data);
+    if (profile_field.field_data) {
+        field_data = JSON.parse(profile_field.field_data);
+    }
+    let choices = [];
+    if (profile_field.type === field_types.SELECT.id) {
+        choices = parse_field_choices_from_field_data(field_data);
     }
 
-    if (Number.parseInt(field.type, 10) === field_types.SELECT.id) {
-        set_up_select_field_edit_form(profile_field, field_data);
-    }
-
-    if (Number.parseInt(field.type, 10) === field_types.EXTERNAL_ACCOUNT.id) {
-        profile_field.$form.find("select[name=external_acc_field_type]").val(field_data.subtype);
-        set_up_external_account_field_edit_form(profile_field, field_data.url_pattern);
-    }
-
-    // Set initial value in edit form
-    profile_field.$form.find("input[name=name]").val(field.name);
-    profile_field.$form.find("input[name=hint]").val(field.hint);
-
-    profile_field.$form.find(".reset").on("click", () => {
-        profile_field.$form.hide();
-        profile_field.$row.show();
+    const html_body = render_edit_custom_profile_field_form({
+        profile_field_info: {
+            id: profile_field.id,
+            name: profile_field.name,
+            hint: profile_field.hint,
+            choices,
+            is_select_field: profile_field.type === field_types.SELECT.id,
+            is_external_account_field: profile_field.type === field_types.EXTERNAL_ACCOUNT.id,
+        },
+        realm_default_external_accounts: page_params.realm_default_external_accounts,
     });
 
-    profile_field.$form.find(".submit").on("click", () => {
-        e.preventDefault();
-        e.stopPropagation();
+    function set_initial_values_of_profile_field() {
+        const $profile_field_modal = $("#edit-custom-profile-field-form-" + field_id);
 
-        const $profile_field_status = $("#admin-profile-field-status").expectOne();
+        let field_data = {};
+        if (profile_field.field_data) {
+            field_data = JSON.parse(profile_field.field_data);
+        }
 
+        if (Number.parseInt(profile_field.type, 10) === field_types.SELECT.id) {
+            set_up_select_field_edit_form($profile_field_modal, field_data);
+        }
+
+        if (Number.parseInt(profile_field.type, 10) === field_types.EXTERNAL_ACCOUNT.id) {
+            $profile_field_modal
+                .find("select[name=external_acc_field_type]")
+                .val(field_data.subtype);
+            set_up_external_account_field_edit_form($profile_field_modal, field_data.url_pattern);
+        }
+
+        // Set initial value in edit form
+        $profile_field_modal.find("input[name=name]").val(profile_field.name);
+        $profile_field_modal.find("input[name=hint]").val(profile_field.hint);
+
+        $profile_field_modal
+            .find(".edit_profile_field_choices_container")
+            .on("input", ".choice-row input", add_choice_row);
+        $profile_field_modal
+            .find(".edit_profile_field_choices_container")
+            .on("click", "button.delete-choice", delete_choice_row);
+        $(".profile_field_external_accounts_edit select").on("change", () => {
+            set_up_external_account_field_edit_form($profile_field_modal, "");
+        });
+    }
+
+    function submit_form() {
+        const $profile_field_modal = $("#edit-custom-profile-field-form-" + field_id);
         // For some reason jQuery's serialize() is not working with
         // channel.patch even though it is supported by $.ajax.
         const data = {};
 
-        data.name = profile_field.$form.find("input[name=name]").val();
-        data.hint = profile_field.$form.find("input[name=hint]").val();
+        data.name = $profile_field_modal.find("input[name=name]").val();
+        data.hint = $profile_field_modal.find("input[name=hint]").val();
         data.field_data = JSON.stringify(
-            read_field_data_from_form(Number.parseInt(field.type, 10), profile_field.$form),
+            read_field_data_from_form(
+                Number.parseInt(profile_field.type, 10),
+                $profile_field_modal,
+            ),
         );
+        const url = "/json/realm/profile_fields/" + field_id;
+        dialog_widget.submit_api_request(channel.patch, url, data);
+    }
 
-        settings_ui.do_settings_change(
-            channel.patch,
-            "/json/realm/profile_fields/" + field_id,
-            data,
-            $profile_field_status,
-        );
-    });
-
-    profile_field.$form
-        .find(".edit_profile_field_choices_container")
-        .on("input", ".choice-row input", add_choice_row);
-    profile_field.$form
-        .find(".edit_profile_field_choices_container")
-        .on("click", "button.delete-choice", delete_choice_row);
-    $(".profile_field_external_accounts_edit select").on("change", (e) => {
-        const field_id = Number.parseInt(
-            $(e.target).closest(".profile-field-form").attr("data-profile-field-id"),
-            10,
-        );
-        const field_form = get_profile_field_info(field_id);
-        set_up_external_account_field_edit_form(field_form, "");
+    dialog_widget.launch({
+        html_heading: $t_html({defaultMessage: "Edit custom profile field"}),
+        html_body,
+        on_click: submit_form,
+        post_render: set_initial_values_of_profile_field,
+        loading_spinner: true,
     });
 }
 
@@ -507,5 +517,5 @@ export function build_page() {
         "#add-custom-profile-field-btn",
         open_custom_profile_field_form_modal,
     );
-    $("#admin_profile_fields_table").on("click", ".open-edit-form", open_edit_form);
+    $("#admin_profile_fields_table").on("click", ".open-edit-form-modal", open_edit_form_modal);
 }
